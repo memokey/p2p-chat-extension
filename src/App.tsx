@@ -19,6 +19,7 @@ function App() {
           const tmpUrl = tabs[0].url;
           setUrl(!!tmpUrl ? tmpUrl: "");
       });
+      (window as any).socket = socket();
   }, []);
 
   /**
@@ -80,19 +81,8 @@ function App() {
   };
 
   return (
-      <div className="App">
-          <header className="App-header">
-              <p>URL:</p>
-              <p>
-                  {url}
-              </p>
-              <button onClick={sendTestMessage}>SEND MESSAGE</button>
-              <button onClick={sendRemoveMessage}>Remove logo</button>
-              <p>Response from content:</p>
-              <p>
-                  {responseFromContent}
-              </p>
-          </header>
+      <div className="min-w-[350px] min-h-[550px] bg-bgc-black">
+        
       </div>
   );
 }
