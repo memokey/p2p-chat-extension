@@ -22,10 +22,5 @@
       "all_frames": false,
       "run_at": "document_end"
     }
-  ],
-  "icons": {
-    "16": "images/ext.png",
-    "48": "images/ext.png",
-    "128": "images/ext.png"
-  }
+  ]
 }

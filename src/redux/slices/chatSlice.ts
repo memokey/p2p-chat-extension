@@ -3,9 +3,9 @@ import ACTIONS from "../../config/actions";
 
 export interface CounterState {
   panelFlag: Boolean;
-  profile: Object;
+  profile: any;
   activeUser: String;
-  onlineUserList: Object[];
+  onlineUserList: any[];
   authFlag: Boolean;
 }
 
@@ -37,7 +37,9 @@ export const chatSlice = createSlice({
       state.authFlag = action.payload;
     },
     addOnlineUser: (state, action: PayloadAction<any>) => {
-      state.onlineUserList.push(action.payload);
+      if(state.onlineUserList.findIndex((s: any) => s.name == action.payload.name) == -1) {
+        state.onlineUserList.push(action.payload);
+      }
     },
     setOnlineUserList: (state, action: PayloadAction<any>) => {
       state.onlineUserList = action.payload;
@@ -45,9 +47,15 @@ export const chatSlice = createSlice({
     setActiveUser: (state, action: PayloadAction<String>) => {
       state.activeUser = action.payload;
     },
+    setUserMsg: (state, action: PayloadAction<any>) => {
+      const userIndex = state.onlineUserList.findIndex((s: any) => s.name == state.profile.username);
+      if(userIndex != -1) {
+        state.onlineUserList[userIndex].msgs.push(action.payload);
+      }
+    },
   },
 });
 
-export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser } = chatSlice.actions;
+export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -9,7 +9,7 @@ import socket from './utils/socket-client';
 import { ChromeMessage, Sender } from "./types";
 import './App.css';
 import Login from './components/Login';
-import { setAuthFlag, setOnlineUserList, setProfile } from './redux/slices/chatSlice';
+import { setAuthFlag, setOnlineUserList, setProfile, setUserMsg } from './redux/slices/chatSlice';
 import { apiCaller } from './utils/apiCaller';
 import ACTIONS from './config/actions';
 import { addOnlineUser } from './redux/slices/chatSlice';
@@ -55,15 +55,21 @@ function App() {
         });
 
         (window as any).socket.on(ACTIONS.ADD_USER_EXTENSION, (user: any) => {
-            if(!!user && user.name != localStorage.getItem('name')) {
+            if(!!user) {
                 dispatch(addOnlineUser(user));
+            }
+        });
+
+        (window as any).socket.on(ACTIONS.SEND_MSG_EXTENSION, (msg: any) => {
+            if(!!msg) {
+                dispatch(setUserMsg(msg));
             }
         });
 
         (window as any).socket.on('logout', (data: any) => {
             dispatch(setProfile({}));
             dispatch(setAuthFlag(false));
-            dispatch(setOnlineUserList({}));
+            dispatch(setOnlineUserList([]));
             localStorage.removeItem("name");
             localStorage.removeItem("authFlag");
             (window as any).socket.disconnect();

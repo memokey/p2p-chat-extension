@@ -1,5 +1,4 @@
-import React, { FC } from "react";
-import { Menu, Setting } from "../icons";
+import { Logout, Menu } from "../icons";
 import { useAppDispatch } from "../../redux/hooks";
 import { setAuthFlag, setOnlineUserList, setProfile, togglePanel } from "../../redux/slices/chatSlice";
 
@@ -13,7 +12,7 @@ const Header = ({ flag }: { flag: Boolean }) => {
   const logout = () => {
     dispatch(setProfile({}));
     dispatch(setAuthFlag(false));
-    dispatch(setOnlineUserList({}));
+    dispatch(setOnlineUserList([]));
     localStorage.removeItem("name");
     localStorage.removeItem("authFlag");
     (window as any).socket.disconnect();
@@ -22,17 +21,17 @@ const Header = ({ flag }: { flag: Boolean }) => {
 
   return (
     <header
-      className="flex items-center justify-between px-5 py-3 border-b border-b-gray-700"
+      className="flex items-center justify-between px-5 py-3 border-b"
     >
-      <div className="text-gray-300 cursor-pointer" onClick={toggleLeftPanel}>
+      <div className="text-gray-300 cursor-pointer hover:text-secondary" onClick={toggleLeftPanel}>
         <Menu />
       </div>
       <div className="text-gray-300 text-2xl">
         P2P chat
       </div>
       {flag ? (
-        <div className="text-gray-300 cursor-pointer" onClick={logout}>
-          <Setting />
+        <div className="text-gray-300 cursor-pointer hover:text-secondary" onClick={logout}>
+          <Logout />
         </div>
       ): (<div></div>)}
     </header>
