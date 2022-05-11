@@ -9,6 +9,7 @@ const ChatContent = ({}: {}) => {
   useEffect(() => {
     const user = onlineUserList.find((s: any) => s.name == (profile as any).username);
     if(!!user) {
+      console.log(user);
       console.log((user as any).msgs);
     }
   }, [])
