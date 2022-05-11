@@ -53,9 +53,15 @@ export const chatSlice = createSlice({
         state.onlineUserList[userIndex].msgs.push(action.payload);
       }
     },
+    removeOnlineUser: (state, action: PayloadAction<string>) => {
+      const userIndex = state.onlineUserList.findIndex((s: any) => s.name == action.payload);
+      if(userIndex != -1) {
+        state.onlineUserList.splice(userIndex, 1);
+      }
+    },
   },
 });
 
-export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg } = chatSlice.actions;
+export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg, removeOnlineUser } = chatSlice.actions;
 
 export default chatSlice.reducer;

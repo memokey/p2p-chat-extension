@@ -9,7 +9,7 @@ import socket from './utils/socket-client';
 import { ChromeMessage, Sender } from "./types";
 import './App.css';
 import Login from './components/Login';
-import { setAuthFlag, setOnlineUserList, setProfile, setUserMsg } from './redux/slices/chatSlice';
+import { removeOnlineUser, setActiveUser, setAuthFlag, setOnlineUserList, setProfile, setUserMsg } from './redux/slices/chatSlice';
 import { apiCaller } from './utils/apiCaller';
 import ACTIONS from './config/actions';
 import { addOnlineUser } from './redux/slices/chatSlice';
@@ -20,7 +20,18 @@ function App() {
   const [responseFromContent, setResponseFromContent] = useState<string>('');
 
   const dispatch = useAppDispatch();
-  const { authFlag } = useAppSelector(state => state.chat);
+  const { authFlag, activeUser, onlineUserList, profile } = useAppSelector(state => state.chat);
+
+  useEffect(() => {
+    if(onlineUserList.length != 0) {
+      const user = onlineUserList.find(s => s.name != profile.username);
+      if(!!user) {
+          dispatch(setActiveUser(user.name));
+      } else {
+          dispatch(setActiveUser(""));
+      }
+    }
+  }, [onlineUserList])
 
   /**
    * Get current URL
@@ -57,6 +68,12 @@ function App() {
         (window as any).socket.on(ACTIONS.ADD_USER_EXTENSION, (user: any) => {
             if(!!user) {
                 dispatch(addOnlineUser(user));
+            }
+        });
+
+        (window as any).socket.on(ACTIONS.REMOVE_USER_EXTENSION, (name: string) => {
+            if(!!name && name != "") {
+                dispatch(removeOnlineUser(name));
             }
         });
 

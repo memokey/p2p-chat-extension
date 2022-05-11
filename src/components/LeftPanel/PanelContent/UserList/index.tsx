@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../redux/hooks";
 import { setActiveUser } from "../../../../redux/slices/chatSlice";
 

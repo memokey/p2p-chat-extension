@@ -5,13 +5,24 @@ import { Menu, Setting } from "../icons";
 
 const ChatContent = ({}: {}) => {
   const [ newMsg, setNewMsg ] = useState("");
-  const [ msgs, setMsgs ] = useState([]);
+  const [ msgs, setMsgs ] = useState<any>([]);
   const { activeUser, onlineUserList, profile } = useAppSelector(state => state.chat);
 
   useEffect(() => {
+    if(activeUser == "") {
+      setMsgs([]);
+    }
+
     if(onlineUserList.length != 0 && activeUser != "") {
       const user = onlineUserList.find((s: any) => s.name == profile.username);
-      setMsgs((user as any).msgs);
+      if(!!user) {
+        var userMsgs = [];
+        for(var i = 0; i < user.msgs.length; i ++) {
+          if(user.msgs[i].members.findIndex((s: string) => s == profile.username) != -1 && user.msgs[i].members.findIndex((s: string) => s == activeUser) != -1)
+          userMsgs.push(user.msgs[i])
+        }
+        setMsgs(userMsgs);
+      }
     }
   }, [onlineUserList, activeUser])
 
