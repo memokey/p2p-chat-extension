@@ -16,7 +16,8 @@ const ChatContent = (props) => {
   const [ msgs, setMsgs ] = useState([]);
   const { activeUser, onlineUserList, profile } = useAppSelector(state => state.chat);
   const [ loaded, setLoaded ] = useState(false);
-  const [ filename, setFileName ] = useState(false);
+  const [ filename, setFileName ] = useState("");
+  const [ filetype, setFileType ] = useState("");
   const [ loading, setLoading ] = useState(false);
   const [ uploadPath, setUploadPath ] = useState("");
   const [ active, setActive ] = useState(false);
@@ -45,9 +46,10 @@ const ChatContent = (props) => {
   const onDrop = useCallback((files) => {
     if(files && files.length > 0){
       if(props.onLoadStart) props.onLoadStart(files.map((x) => parseName(x.name)));
-      async.map(files, (file, cb) => {
+      async.map(files, (file, cb) => {console.log(file);
         setLoading(true);
         setFileName(file.name);
+        setFileType(file.type);
         toBuffer(file, async (err, buff) => {
           if(err) return cb(err)
           if(!ipfs) { setLoading(false);setFileName("");return; }
@@ -108,6 +110,31 @@ const ChatContent = (props) => {
     }
   }
 
+  /** Uses `URL.createObjectURL` free returned ObjectURL with `URL.RevokeObjectURL` when done with it.
+ * 
+ * @param {string} cid CID you want to retrieve
+ * @param {string} mime mimetype of image (optional, but useful)
+ * @param {number} limit size limit of image in bytes
+ * @returns ObjectURL
+ */
+async function loadImgURL(cid, mime, limit) {
+  if (cid == "" || cid == null || cid == undefined) {
+      return;
+  }
+  for await (const file of ipfs.get(cid)) {
+      if (file.size > limit) {
+          return;
+      }
+      const content = [];
+      if (file.content) {
+          for await(const chunk of file.content) {
+              content.push(chunk);
+          }
+          return URL.createObjectURL(new Blob(content, {type: mime}));
+      }
+  }
+}
+
   useEffect(() => {
     if(!!document.querySelector('.ui-chat'))
       document.querySelector('.ui-chat').scrollTop = document.querySelector('.ui-chat').scrollHeight
@@ -123,12 +150,15 @@ const ChatContent = (props) => {
       content: newMsg,
       uploadPath: uploadPath,
       filename: filename,
+      filetype: filetype,
     };
     window.socket.emit(ACTIONS.SEND_MSG_EXTENSION, msg);
     setNewMsg("");
     setLoaded(false);
     setLoading(false);
+    setUploadPath("");
     setFileName("");
+    setFileType("");
   }
   return (
     <div className="h-[540px]">
@@ -150,10 +180,13 @@ const ChatContent = (props) => {
                     <p className={"text-[16px] " + (type == 1 ? "text-secondary": "text-gray-200")}>{type == 0 ? "You": msg.members[0]}<span className="text-gray-500 pl-2 text-xs">{msg.date.slice(0, 15)}</span></p>
                     <div className='text-[14px] font-normal text-gray-400'>
                       {msg.content}
-                      {msg.uploadPath && (
-                        <p className="flex text-secondary">
+                      {msg.uploadPath != "" && (
+                        <div className="text-secondary">
+                          {msg.filetype == "image/jpeg" && (
+                            <img src={msg.uploadPath} width={300} className="pb-1"/>
+                          )}
                           <a href={msg.uploadPath + "?filename=" + msg.filename + "&download=true"} className="flex"><Download />&nbsp;&nbsp;<span className="pt-[2px]">download</span></a>
-                        </p>
+                        </div>
                       )}
                     </div>
                   </div>
