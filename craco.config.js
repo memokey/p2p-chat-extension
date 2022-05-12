@@ -2,6 +2,13 @@ module.exports = {
   webpack: {
       configure: (webpackConfig, {env, paths}) => {
           return {
+                resolve: {
+                    fallback: {
+                        util: require.resolve("util/"),
+                        stream: require.resolve("stream-browserify"),
+                        buffer: require.resolve("buffer")
+                    }
+                },
               ...webpackConfig,
               entry: {
                   main: [env === 'development' &&

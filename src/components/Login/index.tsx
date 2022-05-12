@@ -35,7 +35,7 @@ const Login = ({}: {}) => {
     try {
       const {
         data: { user },
-      } = await apiCaller.post("/users/getUserInfo/" + name);
+      } = await apiCaller.get("/users/getUserInfo/" + name);
       if(!!user && !!user.username) {
         dispatch(setProfile(user));
         localStorage.setItem('name', user.username);

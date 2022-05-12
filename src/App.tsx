@@ -26,7 +26,9 @@ function App() {
     if(onlineUserList.length != 0) {
       const user = onlineUserList.find(s => s.name != profile.username);
       if(!!user) {
-          dispatch(setActiveUser(user.name));
+          if(activeUser == "") {
+              dispatch(setActiveUser(user.name));
+          }
       } else {
           dispatch(setActiveUser(""));
       }
@@ -49,7 +51,7 @@ function App() {
             (window as any).socket.emit(ACTIONS.JOIN_EXTENSION, {name: localStorage.getItem('name')});
             const {
                 data: { user },
-            } = await apiCaller.post("/users/getUserInfo/" + localStorage.getItem('name'));
+            } = await apiCaller.get("/users/getUserInfo/" + localStorage.getItem('name'));
             if(!!user && !!user.username) {
                 dispatch(setProfile(user));
                 localStorage.setItem('name', user.username);
@@ -91,9 +93,10 @@ function App() {
             localStorage.removeItem("authFlag");
             (window as any).socket.disconnect();
             (window as any).socket = undefined;
+            (window as any).authFlag = false;
+            (window as any).initFlag = false;
         });
     }
-
     if(!(window as any).socket){
         (window as any).socket = socket();
     }
@@ -101,7 +104,7 @@ function App() {
         init_socket();
     }
     authChecker();
-  }, []);
+  }, [authFlag]);
 
   /**
    * Send message to the content script

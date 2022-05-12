@@ -17,6 +17,9 @@ const Header = ({ flag }: { flag: Boolean }) => {
     localStorage.removeItem("authFlag");
     (window as any).socket.disconnect();
     (window as any).socket = undefined;
+    (window as any).authFlag = false;
+    (window as any).initFlag = false;
+
   }
 
   return (
