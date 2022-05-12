@@ -19,12 +19,14 @@ const ChatContent = (props) => {
   const [ filename, setFileName ] = useState(false);
   const [ loading, setLoading ] = useState(false);
   const [ uploadPath, setUploadPath ] = useState("");
+  const [ active, setActive ] = useState(false);
 
   useEffect(() => {
     if(!ipfs && !window.ipfs && !props.ipfs){
       console.debug("=> IPFS Dropzone: Creating IPFS node")
       async function initIPFS(){
         ipfs = await create({repo: 'ok' + Math.random()})
+        setActive(true);
         window.ipfs = ipfs;
         console.debug("=> IPFS Dropzone: IPFS node created")
       }
@@ -32,9 +34,11 @@ const ChatContent = (props) => {
     }else if(window.ipfs && !ipfs){
       console.debug("=> IPFS Dropzone: Reusing open IPFS node")
       ipfs = window.ipfs;
+      setActive(true);
     }else if(props.ipfs){
       ipfs = props.ipfs;
       window.ipfs = ipfs;
+      setActive(true);
     }
   }, [window.ipfs, props.ipfs]) 
 
@@ -44,8 +48,9 @@ const ChatContent = (props) => {
       async.map(files, (file, cb) => {
         setLoading(true);
         setFileName(file.name);
-        toBuffer(file, (err, buff) => {
+        toBuffer(file, async (err, buff) => {
           if(err) return cb(err)
+          if(!ipfs) { setLoading(false);setFileName("");return; }
           ipfs.add(buff).then((results) => {
             setLoading(false);
             setLoaded(true);
@@ -160,19 +165,21 @@ const ChatContent = (props) => {
         <div className='flex w-[100% - 40px] p-5 pt-2 h-20'>
           <div className="relative">
             <div className="absolute left-0 top-0 z-10">
-              <Dropzone ref={dropzoneRef} onDrop={onDrop}>
-                {({getRootProps, getInputProps, isDragActive}) => (
-                  <div className="react-ipfs-dropzone" {...getRootProps(rootProps)} {...props}>
-                    <input {...getInputProps()} />
-                    {
-                      !loaded && !loading ?
-                        (<div className="p-2 text-gray-300 cursor-pointer"><Plus /></div>) : 
-                        loading ? (<div className="p-2 text-gray-300 cursor-pointer"><CloudUpload /></div>) : 
-                        (<div className="p-2 text-gray-300 cursor-pointer"><ClipboardCheck /></div>)
-                    }
-                  </div>
-                )}
-              </Dropzone>
+              {active && (
+                <Dropzone ref={dropzoneRef} onDrop={onDrop}>
+                  {({getRootProps, getInputProps, isDragActive}) => (
+                    <div className="react-ipfs-dropzone" {...getRootProps(rootProps)} {...props}>
+                      <input {...getInputProps()}/>
+                      {
+                        !loaded && !loading ?
+                          (<div className="p-2 text-gray-300 cursor-pointer"><Plus /></div>) : 
+                          loading ? (<div className="p-2 text-gray-300 cursor-pointer"><CloudUpload /></div>) : 
+                          (<div className="p-2 text-gray-300 cursor-pointer"><ClipboardCheck /></div>)
+                      }
+                    </div>
+                  )}
+                </Dropzone>
+              )}
             </div>
             <input
               type="text"
