@@ -2,7 +2,7 @@ import axios from "axios";
 
 const urlBase =
   // process.env.NODE_ENV === "development"
-  true
+  false
     ? "http://localhost:3004/api"
     : "https://solarity-server.herokuapp.com/api";
 

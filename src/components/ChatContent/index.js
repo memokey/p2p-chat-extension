@@ -21,6 +21,7 @@ const ChatContent = (props) => {
   const [ loading, setLoading ] = useState(false);
   const [ uploadPath, setUploadPath ] = useState("");
   const [ active, setActive ] = useState(false);
+  const [ dragFlag, setDragFlag ] = useState(false);
 
   useEffect(() => {
     if(!ipfs && !window.ipfs && !props.ipfs){
@@ -44,9 +45,10 @@ const ChatContent = (props) => {
   }, [window.ipfs, props.ipfs]) 
 
   const onDrop = useCallback((files) => {
+    setDragFlag(false);
     if(files && files.length > 0){
       if(props.onLoadStart) props.onLoadStart(files.map((x) => parseName(x.name)));
-      async.map(files, (file, cb) => {console.log(file);
+      async.map(files, (file, cb) => {
         setLoading(true);
         setFileName(file.name);
         setFileType(file.type);
@@ -161,7 +163,18 @@ async function loadImgURL(cid, mime, limit) {
     setFileType("");
   }
   return (
-    <div className="h-[540px]">
+    <div className="h-[540px] relative" onDragEnter={() => setDragFlag(true)}>
+      <div>
+        {active && dragFlag && (
+          <Dropzone ref={dropzoneRef} onDrop={onDrop}>
+            {({getRootProps, getInputProps, isDragActive}) => (
+              <div className="react-ipfs-dropzone absolute w-[350px] h-[540px]" {...getRootProps(rootProps)} {...props} onDragLeave={() => setDragFlag(false)}>
+                <input {...getInputProps()}/>
+              </div>
+            )}
+          </Dropzone>
+        )}
+      </div>
       <div className='w-full h-full flex flex-col'>
         <div className='p-5 py-2 text-md flex text-gray-200 border-b-gray-500 border-bborder-b-gray-700 shadow-md shadow-gray-700'>@{activeUser}</div>
         <div className='ui-chat p-5 pt-2 overflow-auto h-full'>
@@ -182,10 +195,10 @@ async function loadImgURL(cid, mime, limit) {
                       {msg.content}
                       {msg.uploadPath != "" && (
                         <div className="text-secondary">
-                          {msg.filetype == "image/jpeg" && (
+                          {msg.filetype.indexOf('image') != -1 && (
                             <img src={msg.uploadPath} width={300} className="pb-1"/>
                           )}
-                          <a href={msg.uploadPath + "?filename=" + msg.filename + "&download=true"} className="flex"><Download />&nbsp;&nbsp;<span className="pt-[2px]">download</span></a>
+                          <a href={msg.uploadPath + "?filename=" + msg.filename + "&download=true"} className="flex"><span className="pt-[2px]">{msg.filename}</span>&nbsp;&nbsp;<Download /></a>
                         </div>
                       )}
                     </div>
@@ -203,12 +216,14 @@ async function loadImgURL(cid, mime, limit) {
                   {({getRootProps, getInputProps, isDragActive}) => (
                     <div className="react-ipfs-dropzone" {...getRootProps(rootProps)} {...props}>
                       <input {...getInputProps()}/>
-                      {
-                        !loaded && !loading ?
-                          (<div className="p-2 text-gray-300 cursor-pointer"><Plus /></div>) : 
-                          loading ? (<div className="p-2 text-gray-300 cursor-pointer"><CloudUpload /></div>) : 
-                          (<div className="p-2 text-gray-300 cursor-pointer"><ClipboardCheck /></div>)
-                      }
+                      <div className="">
+                        {
+                          !loaded && !loading ?
+                            (<div className="p-2 text-gray-300 cursor-pointer"><Plus /></div>) : 
+                            loading ? (<div className="p-2 text-gray-300 cursor-pointer"><CloudUpload /></div>) : 
+                            (<div className="p-2 text-gray-300 cursor-pointer"><ClipboardCheck /></div>)
+                        }
+                      </div>
                     </div>
                   )}
                 </Dropzone>
@@ -216,7 +231,7 @@ async function loadImgURL(cid, mime, limit) {
             </div>
             <input
               type="text"
-              className="absolute left-0 top-0 w-[350px] py-2 pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
+              className="absolute left-0 top-0 w-[310px] py-2 pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
               value={newMsg}
               onKeyDown={handleKeyDown}
               onChange={(e) => setNewMsg(e.target.value)}

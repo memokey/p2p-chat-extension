@@ -16,13 +16,7 @@ const Login = ({}: {}) => {
 
   const handleKeyDown = (e: any) => {
     if(e.key === 'Enter') {
-      sendMsg();
-    }
-  }
-
-  const sendMsg = () => {
-    if(newMsg != "") {
-      alert(newMsg);
+      login();
     }
   }
 
@@ -64,6 +58,7 @@ const Login = ({}: {}) => {
           <input
             type="text"
             value={name}
+            onKeyDown={handleKeyDown}
             onChange={(e) => setName(e.target.value)}
             className="w-full py-3 pl-6 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none border-gray-500 placeholder:text-gray-950 bg-brandblack  h-[40px]"
             placeholder="Name"
