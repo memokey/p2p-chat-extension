@@ -10,7 +10,7 @@ const socket = () => {
   };
   return io.connect(
     // process.env.NODE_ENV === "development"
-    true
+    false
       ? "http://localhost:3004"
       : "https://solarity-server.herokuapp.com",
     options
