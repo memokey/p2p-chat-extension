@@ -1,13 +1,18 @@
 import React, { FC } from "react";
+import { useAppSelector } from "../../../redux/hooks";
 import GroupList from "./GroupList";
 import UserList from "./UserList";
 
 const PanelContent = ({}: {}) => {
+  const { groupIndex } = useAppSelector(state => state.chat);
 
   return (
     <div>
-      <GroupList />
-      <UserList />
+      {groupIndex == 0 ? (
+        <UserList />
+      ) : (
+        <GroupList />
+      )}
     </div>
   );
 }

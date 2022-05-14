@@ -112,31 +112,6 @@ const ChatContent = (props) => {
     }
   }
 
-  /** Uses `URL.createObjectURL` free returned ObjectURL with `URL.RevokeObjectURL` when done with it.
- * 
- * @param {string} cid CID you want to retrieve
- * @param {string} mime mimetype of image (optional, but useful)
- * @param {number} limit size limit of image in bytes
- * @returns ObjectURL
- */
-async function loadImgURL(cid, mime, limit) {
-  if (cid == "" || cid == null || cid == undefined) {
-      return;
-  }
-  for await (const file of ipfs.get(cid)) {
-      if (file.size > limit) {
-          return;
-      }
-      const content = [];
-      if (file.content) {
-          for await(const chunk of file.content) {
-              content.push(chunk);
-          }
-          return URL.createObjectURL(new Blob(content, {type: mime}));
-      }
-  }
-}
-
   useEffect(() => {
     if(!!document.querySelector('.ui-chat'))
       document.querySelector('.ui-chat').scrollTop = document.querySelector('.ui-chat').scrollHeight
@@ -210,7 +185,15 @@ async function loadImgURL(cid, mime, limit) {
         </div>
         <div className='flex w-[100% - 40px] p-5 pt-2 h-20'>
           <div className="relative">
-            <div className="absolute left-0 top-0 z-10">
+            <input
+              type="text"
+              className="absolute left-0 top-0 w-[310px] py-2 pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
+              value={newMsg}
+              onKeyDown={handleKeyDown}
+              onChange={(e) => setNewMsg(e.target.value)}
+              placeholder="Input a message please."
+            />
+            <div className="absolute left-0 top-0 z-0">
               {active && (
                 <Dropzone ref={dropzoneRef} onDrop={onDrop}>
                   {({getRootProps, getInputProps, isDragActive}) => (
@@ -229,15 +212,7 @@ async function loadImgURL(cid, mime, limit) {
                 </Dropzone>
               )}
             </div>
-            <input
-              type="text"
-              className="absolute left-0 top-0 w-[310px] py-2 pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
-              value={newMsg}
-              onKeyDown={handleKeyDown}
-              onChange={(e) => setNewMsg(e.target.value)}
-              placeholder="Input a message please."
-              />
-            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ export interface CounterState {
   activeUser: String;
   onlineUserList: any[];
   authFlag: Boolean;
+  groupIndex: number;
 }
 
 const initialState: CounterState = {
@@ -15,6 +16,7 @@ const initialState: CounterState = {
   activeUser: "",
   onlineUserList: [],
   authFlag: false,
+  groupIndex: 0,
 };
 
 export const chatSlice = createSlice({
@@ -59,9 +61,12 @@ export const chatSlice = createSlice({
         state.onlineUserList.splice(userIndex, 1);
       }
     },
+    setGroupIndex: (state, action: PayloadAction<number>) => {
+      state.groupIndex = action.payload;
+    },
   },
 });
 
-export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg, removeOnlineUser } = chatSlice.actions;
+export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg, removeOnlineUser, setGroupIndex } = chatSlice.actions;
 
 export default chatSlice.reducer;

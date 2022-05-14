@@ -165,15 +165,15 @@ function App() {
   };
 
   return (
-    <div className="min-w-[350px] min-h-[550px] bg-bgblack z-0">
+    <div className="min-w-[350px] min-h-[550px] bg-bgblack -z-20">
         <Header flag={authFlag} />
         {!authFlag ? (
             <Login />
         ): (
-            <div>
+            <div className='h-full'>
                 <ChatContent />
-                <LeftPanel />
                 <LeftBgPanel />
+                <LeftPanel />
             </div>
         )}
     </div>
