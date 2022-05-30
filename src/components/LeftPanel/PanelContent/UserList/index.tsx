@@ -9,6 +9,7 @@ const UserList = ({}: {}) => {
   const activeUserFunc = (name: string) => {
     dispatch(setActiveUser(name));
   }
+  const degen = chrome.runtime.getURL('images/degen.png')
 
   return (
     <div className="my-2">
@@ -17,7 +18,7 @@ const UserList = ({}: {}) => {
         if(user.name != (profile as any).username) {
           return (
             <div className={"py-1 px-5 flex cursor-pointer " + (activeUser == user.name ? "bg-secondary text-gray-100": "text-gray-400 hover:bg-darkcharcoal")} key={index} onClick={() => activeUserFunc(user.name)}>
-              <img className="rounded-md border border-gray-900" src={"/avatars/degen.png"} width={30} height={30} />
+              <img className="rounded-md border border-gray-900" src={degen} width={30} height={30} />
               <p className="pl-2">{user.name}</p>
             </div>
           );

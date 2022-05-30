@@ -3,11 +3,6 @@
   "description": "P2P Extension",
   "version": "1.0",
   "manifest_version": 3,
-  "action": {
-    "default_icon": "images/ext.png",
-    "default_popup": "index.html",
-    "default_title": "P2P Chat"
-  },
   "content_security_policy": {},
   "permissions": [
     "activeTab"
@@ -18,9 +13,14 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["./static/js/content.js"],
+      "js": ["./js/content.js", "./js/main.js"],
+      "css": ["./css/main.css"],
       "all_frames": false,
       "run_at": "document_end"
     }
-  ]
+  ],
+  "web_accessible_resources": [{ 
+    "resources": ["/images/*"],
+    "matches": ["<all_urls>"]
+  }]
 }

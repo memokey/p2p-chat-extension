@@ -9,15 +9,20 @@ import socket from './utils/socket-client';
 import { ChromeMessage, Sender } from "./types";
 import './App.css';
 import Login from './components/Login';
-import { removeOnlineUser, setActiveUser, setAuthFlag, setOnlineUserList, setProfile, setUserMsg } from './redux/slices/chatSlice';
+import { removeOnlineUser, setActiveUser, setAuthFlag, setGroupMsg, setGroupMsgs, setOnlineUserList, setProfile, setUserMsg } from './redux/slices/chatSlice';
 import { apiCaller } from './utils/apiCaller';
 import ACTIONS from './config/actions';
 import { addOnlineUser } from './redux/slices/chatSlice';
+import { toast } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Chat } from './components/icons';
 
 function App() {
 
-  const [url, setUrl] = useState<string>('');
-  const [responseFromContent, setResponseFromContent] = useState<string>('');
+  const [ url, setUrl ] = useState<string>('');
+  const [ responseFromContent, setResponseFromContent ] = useState<string>('');
+  const [ panelState, setPanelState ] = useState(false);
 
   const dispatch = useAppDispatch();
   const { authFlag, activeUser, onlineUserList, profile } = useAppSelector(state => state.chat);
@@ -79,9 +84,30 @@ function App() {
             }
         });
 
+        (window as any).socket.on(ACTIONS.GET_GROUP_MSGS, (data: any) => {
+            if(!!data.msgs && !!data.daoId) {
+                dispatch(setGroupMsgs({ daoId: data.daoId, msgs: data.msgs }));
+            }
+        });
+
         (window as any).socket.on(ACTIONS.SEND_MSG_EXTENSION, (msg: any) => {
             if(!!msg) {
-                dispatch(setUserMsg(msg));
+                if(msg.groupType) {
+                    dispatch(setGroupMsg(msg));
+                } else {
+                    dispatch(setUserMsg(msg));
+                }
+                if(msg.members[0] != localStorage.getItem('name') && localStorage.getItem('authFlag') == "true") {
+                    toast.success(msg.content, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
+                }
             }
         });
 
@@ -164,9 +190,50 @@ function App() {
       });
   };
 
+  const togglePanel = () => {
+      setPanelState(false);
+      localStorage.setItem('toggle-sharity-panel', "false");
+  }
+
+  useEffect(() => {
+      if(panelState) {
+          document.getElementsByTagName('body')[0].style.setProperty('margin-right', 'auto', '')
+      } else {
+          document.getElementsByTagName('body')[0].style.setProperty('margin-right', '350px', 'important');
+      }
+  }, [panelState])
+
+  useEffect(() => {
+    if(localStorage.getItem('toggle-sharity-panel') == "true"){
+        setPanelState(true);
+    } else {
+        setPanelState(false);
+    }
+  }, [])
+
+  if(panelState) {
+   return (
+       <div className='bg-gray-900 text-gray-100 p-2 shadow-2xl shadow-gray-500 rounded-full mt-2 mr-2 cursor-pointer' onClick={togglePanel}>
+           <Chat />
+           <ToastContainer
+            style={{ position: "fixed", zIndex: "100000000" }}
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            />
+       </div>
+   );   
+  }
   return (
-    <div className="min-w-[350px] min-h-[550px] bg-bgblack -z-20">
-        <Header flag={authFlag} />
+    <div className="!min-w-[350px] !min-h-[100vh] !bg-bgblack !z-[10000]">
+        <Header flag={authFlag} setPanelState={setPanelState} />
         {!authFlag ? (
             <Login />
         ): (
@@ -176,6 +243,19 @@ function App() {
                 <LeftPanel />
             </div>
         )}
+        <ToastContainer
+          style={{ position: "fixed", zIndex: "100000000" }}
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
     </div>
   );
 }

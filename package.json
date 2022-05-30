@@ -16,17 +16,21 @@
     "axios": "^0.27.2",
     "blob-to-buffer": "^1.2.9",
     "buffer": "^6.0.3",
+    "dotenv": "^16.0.1",
     "ipfs": "^0.62.3",
+    "mini-css-extract-plugin": "^2.6.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-dropzone": "^14.2.1",
     "react-redux": "^8.0.1",
     "react-scripts": "5.0.1",
+    "react-toastify": "^9.0.1",
     "socket.io-client": "^4.5.0",
     "stream-browserify": "^3.0.0",
     "typescript": "^4.6.4",
     "util": "^0.12.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "webpack": "^5.72.1"
   },
   "scripts": {
     "start": "react-scripts start",

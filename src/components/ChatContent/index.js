@@ -7,6 +7,7 @@ import { Buffer } from "buffer";
 import Dropzone from 'react-dropzone';
 import async from 'async';
 import { ClipboardCheck, CloudUpload, Download, Plus } from "../icons";
+const degen = chrome.runtime.getURL('images/degen.png')
 
 var ipfs = window.ipfs;
 window.Buffer = Buffer;
@@ -14,7 +15,7 @@ window.Buffer = Buffer;
 const ChatContent = (props) => {
   const [ newMsg, setNewMsg ] = useState("");
   const [ msgs, setMsgs ] = useState([]);
-  const { activeUser, onlineUserList, profile } = useAppSelector(state => state.chat);
+  const { activeUser, onlineUserList, profile, groupIndex, daoGroups } = useAppSelector(state => state.chat);
   const [ loaded, setLoaded ] = useState(false);
   const [ filename, setFileName ] = useState("");
   const [ filetype, setFileType ] = useState("");
@@ -92,19 +93,25 @@ const ChatContent = (props) => {
     if(activeUser == "") {
       setMsgs([]);
     }
-
-    if(onlineUserList.length != 0 && activeUser != "") {
-      const user = onlineUserList.find(s => s.name == profile.username);
-      if(!!user) {
-        var userMsgs = [];
-        for(var i = 0; i < user.msgs.length; i ++) {
-          if(user.msgs[i].members.findIndex(s => s == profile.username) != -1 && user.msgs[i].members.findIndex(s => s == activeUser) != -1)
-          userMsgs.push(user.msgs[i])
+    if(groupIndex > 0) {
+      setMsgs([]);
+      if(!!daoGroups[groupIndex - 1].msgs) {
+        setMsgs(daoGroups[groupIndex - 1].msgs);
+      }
+    } else {
+      if(onlineUserList.length != 0 && activeUser != "") {
+        const user = onlineUserList.find(s => s.name == profile.username);
+        if(!!user) {
+          var userMsgs = [];
+          for(var i = 0; i < user.msgs.length; i ++) {
+            if(user.msgs[i].members.findIndex(s => s == profile.username) != -1 && user.msgs[i].members.findIndex(s => s == activeUser) != -1)
+            userMsgs.push(user.msgs[i])
+          }
+          setMsgs(userMsgs);
         }
-        setMsgs(userMsgs);
       }
     }
-  }, [onlineUserList, activeUser])
+  }, [onlineUserList, activeUser, groupIndex, daoGroups])
 
   const handleKeyDown = e => {
     if(e.key === 'Enter') {
@@ -117,12 +124,24 @@ const ChatContent = (props) => {
       document.querySelector('.ui-chat').scrollTop = document.querySelector('.ui-chat').scrollHeight
   }, [msgs])
 
+  useEffect(() => {
+    if(groupIndex > 0) {
+      window.socket.emit(ACTIONS.GET_GROUP_MSGS, {daoId: daoGroups[groupIndex - 1]._id})
+    }
+  }, [groupIndex])
+
   const sendMsg = () => {
-    if(newMsg == "" && uploadPath == "" || activeUser == "") {
+    if(newMsg == "" && uploadPath == "" || (activeUser == "" && groupIndex <= 0)) {
       return;
     }
+    var groupType = false;
+    if(groupIndex > 0) {
+      groupType = true;
+    }
     const msg = {
-      members: [profile.username, activeUser],
+      groupType,
+      daoId: groupType ? daoGroups[groupIndex - 1]._id: null,
+      members: groupType? [profile.username]: [profile.username, activeUser],
       date: Date(),
       content: newMsg,
       uploadPath: uploadPath,
@@ -138,12 +157,12 @@ const ChatContent = (props) => {
     setFileType("");
   }
   return (
-    <div className="h-[540px] relative" onDragEnter={() => setDragFlag(true)}>
+    <div className="h-[100vh] relative" onDragEnter={() => setDragFlag(true)}>
       <div>
         {active && dragFlag && (
           <Dropzone ref={dropzoneRef} onDrop={onDrop}>
             {({getRootProps, getInputProps, isDragActive}) => (
-              <div className="react-ipfs-dropzone absolute w-[350px] h-[540px]" {...getRootProps(rootProps)} {...props} onDragLeave={() => setDragFlag(false)}>
+              <div className="react-ipfs-dropzone absolute w-[350px] h-[100vh]" {...getRootProps(rootProps)} {...props} onDragLeave={() => setDragFlag(false)}>
                 <input {...getInputProps()}/>
               </div>
             )}
@@ -151,8 +170,14 @@ const ChatContent = (props) => {
         )}
       </div>
       <div className='w-full h-full flex flex-col'>
-        <div className='p-5 py-2 text-md flex text-gray-200 border-b-gray-500 border-bborder-b-gray-700 shadow-md shadow-gray-700'>@{activeUser}</div>
-        <div className='ui-chat p-5 pt-2 overflow-auto h-full'>
+        <div className='!p-5 !py-2 text-md flex text-gray-200 border-b border-b-gray-700 shadow-md shadow-gray-700'>
+          {groupIndex > 0 ? (
+            <span>general / {daoGroups[groupIndex - 1].name}</span>
+          ): (
+            <span>@{activeUser}</span>
+          )}
+        </div>
+        <div className='ui-chat p-5 pt-2 overflow-auto h-[78vh]'>
           {msgs && msgs.map((msg, index) => {
             if(msg.members.find(s => s == activeUser) != -1) {
               var type = 1;
@@ -162,7 +187,7 @@ const ChatContent = (props) => {
               return (
                 <div className='flex flex-row py-1' key={index}>
                   <div className='rounded-full mr-3 mt-1 flex-shrink-0'>
-                    <img src="/avatars/degen.png" className="rounded-full border border-gary-900" alt="" width={40} height={40} />
+                    <img src={degen} className="rounded-full border border-gary-900" alt="" width={40} height={40} />
                   </div>
                   <div>
                     <p className={"text-[16px] " + (type == 1 ? "text-secondary": "text-gray-200")}>{type == 0 ? "You": msg.members[0]}<span className="text-gray-500 pl-2 text-xs">{msg.date.slice(0, 15)}</span></p>
@@ -171,7 +196,7 @@ const ChatContent = (props) => {
                       {msg.uploadPath != "" && (
                         <div className="text-secondary">
                           {msg.filetype.indexOf('image') != -1 && (
-                            <img src={msg.uploadPath} width={300} className="pb-1"/>
+                            <img src={msg.uploadPath} width={250} className="pb-1"/>
                           )}
                           <a href={msg.uploadPath + "?filename=" + msg.filename + "&download=true"} className="flex"><span className="pt-[2px]">{msg.filename}</span>&nbsp;&nbsp;<Download /></a>
                         </div>
@@ -187,7 +212,7 @@ const ChatContent = (props) => {
           <div className="relative">
             <input
               type="text"
-              className="absolute left-0 top-0 w-[310px] py-2 pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
+              className="absolute left-0 top-0 w-[310px] !py-2 !pl-10 text-[15px] font-light text-white border-transparent border rounded-md focus:outline-none focus:border-gray-500 focus:border focus:text-white placeholder:text-gray-950 bg-brandblack  h-[40px]"
               value={newMsg}
               onKeyDown={handleKeyDown}
               onChange={(e) => setNewMsg(e.target.value)}

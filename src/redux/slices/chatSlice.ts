@@ -8,6 +8,7 @@ export interface CounterState {
   onlineUserList: any[];
   authFlag: Boolean;
   groupIndex: number;
+  daoGroups: any[];
 }
 
 const initialState: CounterState = {
@@ -17,6 +18,7 @@ const initialState: CounterState = {
   onlineUserList: [],
   authFlag: false,
   groupIndex: 0,
+  daoGroups: [],
 };
 
 export const chatSlice = createSlice({
@@ -55,6 +57,21 @@ export const chatSlice = createSlice({
         state.onlineUserList[userIndex].msgs.push(action.payload);
       }
     },
+    setGroupMsg: (state, action: PayloadAction<any>) => {
+      const daoIndex = state.daoGroups.findIndex((s: any) => s._id == action.payload.daoId);
+      if(daoIndex != -1) {
+        if(!state.daoGroups[daoIndex].msgs) {
+          state.daoGroups[daoIndex].msgs = [];
+        }
+        state.daoGroups[daoIndex].msgs.push(action.payload);
+      }
+    },
+    setGroupMsgs: (state, action: PayloadAction<any>) => {
+      const daoIndex = state.daoGroups.findIndex((s: any) => s._id == action.payload.daoId);
+      if(daoIndex != -1) {
+        state.daoGroups[daoIndex].msgs = action.payload.msgs;
+      }
+    },
     removeOnlineUser: (state, action: PayloadAction<string>) => {
       const userIndex = state.onlineUserList.findIndex((s: any) => s.name == action.payload);
       if(userIndex != -1) {
@@ -64,9 +81,12 @@ export const chatSlice = createSlice({
     setGroupIndex: (state, action: PayloadAction<number>) => {
       state.groupIndex = action.payload;
     },
+    setDaos: (state, action: PayloadAction<any[]>) => {
+      state.daoGroups = action.payload;
+    }
   },
 });
 
-export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg, removeOnlineUser, setGroupIndex } = chatSlice.actions;
+export const { togglePanel, setProfile, setAuthFlag, addOnlineUser, setOnlineUserList, setActiveUser, setUserMsg, setGroupMsg, setGroupMsgs, removeOnlineUser, setGroupIndex, setDaos } = chatSlice.actions;
 
 export default chatSlice.reducer;

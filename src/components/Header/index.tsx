@@ -1,8 +1,8 @@
-import { Logout, Menu } from "../icons";
+import { Logout, Menu, Minus } from "../icons";
 import { useAppDispatch } from "../../redux/hooks";
 import { setAuthFlag, setOnlineUserList, setProfile, togglePanel } from "../../redux/slices/chatSlice";
 
-const Header = ({ flag }: { flag: Boolean }) => {
+const Header = ({ flag, setPanelState }: { flag: Boolean, setPanelState: Function }) => {
   const dispatch = useAppDispatch();
 
   const toggleLeftPanel = () => {
@@ -22,21 +22,31 @@ const Header = ({ flag }: { flag: Boolean }) => {
 
   }
 
+  const toggleEntirePanel = () => {
+    setPanelState(true);
+    localStorage.setItem('toggle-sharity-panel', "true");
+  }
+
   return (
     <header
-      className="flex items-center justify-between px-5 py-3 border-b"
+      className="!flex !items-center !justify-between !px-5 !py-3 !border-b"
     >
-      <div className="text-gray-300 cursor-pointer hover:text-secondary" onClick={toggleLeftPanel}>
+      <div className="!text-gray-300 !cursor-pointer hover:!text-secondary" onClick={toggleLeftPanel}>
         <Menu />
       </div>
-      <div className="text-gray-300 text-2xl">
-        P2P chat
+      <div className="text-gray-300 !text-2xl">
+        Solarity chat
       </div>
-      {flag ? (
-        <div className="text-gray-300 cursor-pointer hover:text-secondary" onClick={logout}>
-          <Logout />
+        <div className="flex gap-2">
+          {flag ? (
+            <div className="!text-gray-300 !cursor-pointer hover:!text-secondary" onClick={logout}>
+              <Logout />
+            </div>
+          ): (<div></div>)}
+          <div className="!text-gray-300 !cursor-pointer hover:!text-secondary" onClick={toggleEntirePanel}>
+            <Minus />
+          </div>
         </div>
-      ): (<div></div>)}
     </header>
   );
 }

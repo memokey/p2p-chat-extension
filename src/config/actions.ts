@@ -4,6 +4,7 @@ const ACTIONS = {
   ADD_USER_EXTENSION: 'add-user-extension',
   USER_INFO_EXTENSION: 'user-info-extension',
   JOIN_EXTENSION: 'join-extension',
+  GET_GROUP_MSGS: 'get-group-msgs',
 };
 
 export default ACTIONS;

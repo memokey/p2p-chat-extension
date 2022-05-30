@@ -13,7 +13,7 @@ const LeftBgPanel = ({}: {}) => {
 
   return (
     <div 
-      className={"fixed left-0 bottom-0 w-full h-full m-0 bg-[rgba(51, 51, 51, 0.5)] backdrop-blur-sm z-0 " + (panelFlag ? "block": "hidden")}
+      className={"fixed top-0 right-0 w-[350px] h-[100vh] m-0 bg-[rgba(51, 51, 51, 0.5)] backdrop-blur-sm z-0 " + (panelFlag ? "block": "hidden")}
       onClick={toggleLeftPanel}
     >
     </div>
